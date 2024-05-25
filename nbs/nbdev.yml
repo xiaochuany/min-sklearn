@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "min-sklearn"
+  site-url: "https://xiaochuany.github.io/min-sklearn"
+  description: "minimal implementation of sklearn"
+  repo-branch: main
+  repo-url: "https://github.com/xiaochuany/min-sklearn"
