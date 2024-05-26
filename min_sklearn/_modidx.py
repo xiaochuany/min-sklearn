@@ -12,4 +12,5 @@ d = { 'settings': { 'branch': 'main',
                                                                                       'min_sklearn/metrics.py'),
                                      'min_sklearn.metrics.precision_score': ('metrics.html#precision_score', 'min_sklearn/metrics.py'),
                                      'min_sklearn.metrics.recall_score': ('metrics.html#recall_score', 'min_sklearn/metrics.py'),
-                                     'min_sklearn.metrics.roc_auc_score': ('metrics.html#roc_auc_score', 'min_sklearn/metrics.py')}}}
+                                     'min_sklearn.metrics.roc_auc_score': ('metrics.html#roc_auc_score', 'min_sklearn/metrics.py'),
+                                     'min_sklearn.metrics.roc_curve': ('metrics.html#roc_curve', 'min_sklearn/metrics.py')}}}
