@@ -7,7 +7,9 @@ d = { 'settings': { 'branch': 'main',
                 'lib_path': 'min_sklearn'},
   'syms': { 'min_sklearn.metrics': { 'min_sklearn.metrics.accuracy_score': ('metrics.html#accuracy_score', 'min_sklearn/metrics.py'),
                                      'min_sklearn.metrics.f1_score': ('metrics.html#f1_score', 'min_sklearn/metrics.py'),
+                                     'min_sklearn.metrics.log_loss': ('metrics.html#log_loss', 'min_sklearn/metrics.py'),
                                      'min_sklearn.metrics.precision_recall_fscore': ( 'metrics.html#precision_recall_fscore',
                                                                                       'min_sklearn/metrics.py'),
                                      'min_sklearn.metrics.precision_score': ('metrics.html#precision_score', 'min_sklearn/metrics.py'),
-                                     'min_sklearn.metrics.recall_score': ('metrics.html#recall_score', 'min_sklearn/metrics.py')}}}
+                                     'min_sklearn.metrics.recall_score': ('metrics.html#recall_score', 'min_sklearn/metrics.py'),
+                                     'min_sklearn.metrics.roc_auc_score': ('metrics.html#roc_auc_score', 'min_sklearn/metrics.py')}}}
