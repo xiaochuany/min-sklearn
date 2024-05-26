@@ -79,7 +79,7 @@ def roc_auc_score(y_true, y_score):
 
 # %% ../nbs/metrics.ipynb 17
 class RocCurveDisplay:
-    
+    """plot result of `roc_curve` which returns fpr, tpr, _ """
     @classmethod
     def from_predictions(cls, y_true, y_score):
         fpr, tpr, _ = roc_curve(y_true, y_score)
