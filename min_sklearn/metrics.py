@@ -2,10 +2,11 @@
 
 # %% auto 0
 __all__ = ['accuracy_score', 'precision_recall_fscore', 'precision_score', 'recall_score', 'f1_score', 'log_loss', 'roc_curve',
-           'roc_auc_score']
+           'roc_auc_score', 'RocCurveDisplay']
 
 # %% ../nbs/metrics.ipynb 3
 import numpy as np
+import matplotlib.pyplot as plt
 
 # %% ../nbs/metrics.ipynb 4
 def accuracy_score(y_true, y_pred, *, normalize=False, weights=None):
@@ -75,3 +76,15 @@ def roc_auc_score(y_true, y_score):
     fpr_inc = (np.roll(fpr,-1) - fpr)[:-1]
     auc = (fpr_inc * tpr[:-1]).sum()
     return auc
+
+# %% ../nbs/metrics.ipynb 17
+class RocCurveDisplay:
+    
+    @classmethod
+    def from_predictions(cls, y_true, y_score):
+        fpr, tpr, _ = roc_curve(y_true, y_score)
+        return plt.plot(fpr, tpr)
+    
+    @classmethod
+    def from_estimator(cls, clf, y_true, y_score):
+        raise NotImplemented
