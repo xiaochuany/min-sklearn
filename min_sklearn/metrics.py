@@ -59,25 +59,37 @@ def log_loss(y_true, y_pred, *, sample_weights=None):
     return loss
 
 # %% ../nbs/metrics.ipynb 13
-def roc_curve(y_true, y_score):
-    y = np.stack([y_true, y_score], axis=-1)
-    idxs = np.argsort(y, axis=0)[::-1,-1] # idxs that sort arr by score descending
-    y = y[idxs]
-    tcum = np.cumsum(y[:,0])
-    tpr = tcum/tcum[-1]
-    fcum = np.cumsum(1-y[:,0])
-    fpr = fcum/fcum[-1]
-    thresholds = y[:,1]
-    return fpr, tpr, thresholds
+def roc_curve(y_true, y_score, *, pos_label=None):
+    y_true = y_true.reshape(-1,1)
+    if y_score.ndim == 1:
+        y_score = np.concatenate([1-y_score.reshape(-1,1), y_score.reshape(-1,1)], axis=-1)
+    y = np.concatenate([y_true, y_score], axis=-1)
+    labels = np.sort(np.unique(y_true)) # assume all labels are present in y_true
+    tprs = np.zeros(y_score.shape)
+    fprs = np.zeros(y_score.shape)
+    thresholds = np.zeros(y_score.shape)
+    for i in range(len(labels)):
+        idxs = np.argsort(y, axis=0)[::-1,i+1] # idxs that sort arr by score descending
+        yi = np.where(y[idxs,0]==labels[i], 1, 0) # rewrite y_true to binary
+        tcum = np.cumsum(yi)
+        tprs[:,i] = tcum/tcum[-1]
+        fcum = np.cumsum(1-yi)
+        fprs[:,i] = fcum/fcum[-1]
+        thresholds[:,i] = y[idxs,i+1]
+    if pos_label is None:
+        # assume {-1,1} or {0,1} labels in y_true
+        pos_label = 1
+    idx = np.where(labels==pos_label)[0].item()
+    return fprs[:,idx], tprs[:,idx], thresholds[:,idx]
 
-# %% ../nbs/metrics.ipynb 14
+# %% ../nbs/metrics.ipynb 16
 def roc_auc_score(y_true, y_score):
     fpr, tpr, _ =  roc_curve(y_true, y_score)
     fpr_inc = (np.roll(fpr,-1) - fpr)[:-1]
     auc = (fpr_inc * tpr[:-1]).sum()
     return auc
 
-# %% ../nbs/metrics.ipynb 17
+# %% ../nbs/metrics.ipynb 19
 class RocCurveDisplay:
     """plot result of `roc_curve` which returns fpr, tpr, _ """
     @classmethod
