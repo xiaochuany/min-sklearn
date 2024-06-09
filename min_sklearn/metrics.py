@@ -9,14 +9,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # %% ../nbs/metrics.ipynb 4
-def accuracy_score(y_true, y_pred, *, normalize=False, weights=None):
-    """expects numpy.array"""
+def accuracy_score(y_true: np.ndarray, # true labels 
+                   y_pred: np.ndarray, # predicted labels
+                   normalize=False, # if weights is not None, normalize by sum of weights
+                   weights: np.ndarray|None = None, # weights for each sample
+                   ):
+    """computes accuracy for binary or multiclass classification"""
     scores = (y_true==y_pred).astype(float) # bool*int, int*float not allowed
     if weights is not None: scores *= weights 
     scale = weights.sum() if weights is not None else scores.size
     return scores.sum()/scale.astype(float) if normalize else scores.sum()
 
-# %% ../nbs/metrics.ipynb 6
+# %% ../nbs/metrics.ipynb 7
 def precision_recall_fscore(y_true, y_pred):
     labels = np.union1d(y_true, y_pred)
     recs = np.zeros(labels.size)
@@ -30,25 +34,25 @@ def precision_recall_fscore(y_true, y_pred):
     fs = 2*recs*pres/(recs+pres)
     return pres.mean(), recs.mean(), fs.mean()
 
-# %% ../nbs/metrics.ipynb 7
+# %% ../nbs/metrics.ipynb 8
 def precision_score(y_true, y_pred):
     """compute the average precision, even in the binary case"""
     prec, _, _ = precision_recall_fscore(y_true, y_pred)
     return prec
 
-# %% ../nbs/metrics.ipynb 8
+# %% ../nbs/metrics.ipynb 9
 def recall_score(y_true, y_pred):
     """compute the average recall, even in the binary case"""
     _, rec, _ = precision_recall_fscore(y_true, y_pred)
     return rec
 
-# %% ../nbs/metrics.ipynb 9
+# %% ../nbs/metrics.ipynb 10
 def f1_score(y_true, y_pred):
     """compute the average f1, even in the binary case"""
     _, _, f1 = precision_recall_fscore(y_true, y_pred)
     return f1
 
-# %% ../nbs/metrics.ipynb 11
+# %% ../nbs/metrics.ipynb 12
 def log_loss(y_true, y_pred, *, sample_weights=None):
     """ y_true.dim == 1, y_pred.dim == 2, sample_weights.dim == 1"""
     probs = y_pred[np.arange(y_true.size),y_true]
@@ -58,7 +62,7 @@ def log_loss(y_true, y_pred, *, sample_weights=None):
         loss = -np.log(probs).mean()
     return loss
 
-# %% ../nbs/metrics.ipynb 13
+# %% ../nbs/metrics.ipynb 14
 def roc_curve(y_true, y_score, *, pos_label=None):
     y_true = y_true.reshape(-1,1)
     if y_score.ndim == 1:
@@ -82,14 +86,14 @@ def roc_curve(y_true, y_score, *, pos_label=None):
     idx = np.where(labels==pos_label)[0].item()
     return fprs[:,idx], tprs[:,idx], thresholds[:,idx]
 
-# %% ../nbs/metrics.ipynb 16
+# %% ../nbs/metrics.ipynb 17
 def roc_auc_score(y_true, y_score):
     fpr, tpr, _ =  roc_curve(y_true, y_score)
     fpr_inc = (np.roll(fpr,-1) - fpr)[:-1]
     auc = (fpr_inc * tpr[:-1]).sum()
     return auc
 
-# %% ../nbs/metrics.ipynb 19
+# %% ../nbs/metrics.ipynb 20
 class RocCurveDisplay:
     """plot result of `roc_curve` which returns fpr, tpr, _ """
     @classmethod
