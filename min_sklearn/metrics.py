@@ -5,6 +5,8 @@ __all__ = ['accuracy_score', 'precision_recall_fscore', 'precision_score', 'reca
            'roc_auc_score', 'RocCurveDisplay']
 
 # %% ../nbs/metrics.ipynb 3
+from typing import Union
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -12,7 +14,7 @@ import matplotlib.pyplot as plt
 def accuracy_score(y_true: np.ndarray, # true labels 
                    y_pred: np.ndarray, # predicted labels
                    normalize=False, # if weights is not None, normalize by sum of weights
-                   weights: np.ndarray|None = None, # weights for each sample
+                   weights: Union[np.ndarray,None] = None, # weights for each sample
                    ):
     """computes accuracy for binary or multiclass classification"""
     scores = (y_true==y_pred).astype(float) # bool*int, int*float not allowed
