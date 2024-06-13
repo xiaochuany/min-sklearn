@@ -32,7 +32,7 @@ assert accuracy_score(x,y, normalize=True, sample_weight = np.array([1, 1, 1, 0]
 
 #### todo
 
-- [ ] finish classification metrics; allow sample weight and multi-class
+- [x] finish classification metrics; allow sample weight and multi-class
 - [ ] make_scorer
 - [ ] base and mixin
 - [ ] logistic regression
