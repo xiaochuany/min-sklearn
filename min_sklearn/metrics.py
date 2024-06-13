@@ -2,13 +2,14 @@
 
 # %% auto 0
 __all__ = ['accuracy_score', 'confusion_matrix', 'precision_recall_fscore', 'precision_score', 'recall_score', 'f1_score',
-           'log_loss', 'roc_curve', 'roc_auc_score', 'RocCurveDisplay']
+           'log_loss', 'roc_curve', 'roc_auc_score', 'RocCurveDisplay', 'ConfusionMatrixDisplay']
 
 # %% ../nbs/metrics.ipynb 3
 from typing import Union
 
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # %% ../nbs/metrics.ipynb 4
 def accuracy_score(y_true: np.ndarray, # true labels 
@@ -43,52 +44,58 @@ def confusion_matrix(
     C = ohe_true.T @ ohe_pred
     return C
 
-# %% ../nbs/metrics.ipynb 10
+# %% ../nbs/metrics.ipynb 9
 def precision_recall_fscore(y_true:np.ndarray,# true labels 
                             y_pred:np.ndarray, # predicted labels
+                            sample_weight: Union[np.ndarray,None] = None, # weights for each sample
                             ):
+    """macro average the metrics across classes"""
     labels = np.union1d(y_true, y_pred)
     recs = np.zeros(labels.size)
     pres = np.zeros(labels.size)
+    w = sample_weight if sample_weight is not None else np.ones(y_true.size)
     for i, label in enumerate(labels):
-        tp = (y_true==label).astype(float) @ (y_pred==label)
-        fp = (y_true!=label).astype(float) @ (y_pred==label)
-        fn = (y_true==label).astype(float) @ (y_pred!=label)
-        recs[i] = tp/(tp+fn)
+        tp = (y_true==label).astype(float)*w @ (y_pred==label)
+        fp = (y_true!=label).astype(float)*w @ (y_pred==label)
+        fn = (y_true==label).astype(float)*w @ (y_pred!=label)
+        recs[i] = tp/(tp+fn) # assume no division by zero
         pres[i] = tp/(tp+fp)
     fs = 2*recs*pres/(recs+pres)
     return pres.mean(), recs.mean(), fs.mean()
 
-# %% ../nbs/metrics.ipynb 11
-def precision_score(y_true, y_pred):
-    """compute the average precision, even in the binary case"""
-    prec, _, _ = precision_recall_fscore(y_true, y_pred)
+# %% ../nbs/metrics.ipynb 10
+def precision_score(y_true, y_pred, **kwargs):
+    """compute the macro averaged precision """
+    prec, _, _ = precision_recall_fscore(y_true, y_pred, **kwargs)
     return prec
 
-# %% ../nbs/metrics.ipynb 12
-def recall_score(y_true, y_pred):
-    """compute the average recall, even in the binary case"""
-    _, rec, _ = precision_recall_fscore(y_true, y_pred)
+# %% ../nbs/metrics.ipynb 11
+def recall_score(y_true, y_pred, **kwargs):
+    """compute the macro averaged recall"""
+    _, rec, _ = precision_recall_fscore(y_true, y_pred, **kwargs)
     return rec
 
-# %% ../nbs/metrics.ipynb 13
-def f1_score(y_true, y_pred):
-    """compute the average f1, even in the binary case"""
-    _, _, f1 = precision_recall_fscore(y_true, y_pred)
+# %% ../nbs/metrics.ipynb 12
+def f1_score(y_true, y_pred, **kwargs):
+    """compute the macro averaged f1 score"""
+    _, _, f1 = precision_recall_fscore(y_true, y_pred, **kwargs)
     return f1
 
-# %% ../nbs/metrics.ipynb 15
-def log_loss(y_true, y_pred, *, sample_weights=None):
+# %% ../nbs/metrics.ipynb 14
+def log_loss(y_true, y_pred, *, sample_weight=None):
     """ y_true.dim == 1, y_pred.dim == 2, sample_weights.dim == 1"""
     probs = y_pred[np.arange(y_true.size),y_true]
-    if sample_weights is not None: 
-        loss = -np.log(probs) @ sample_weights / sample_weights.sum()
+    if sample_weight is not None: 
+        loss = -np.log(probs) @ sample_weight / sample_weight.sum()
     else: 
         loss = -np.log(probs).mean()
     return loss
 
-# %% ../nbs/metrics.ipynb 17
+# %% ../nbs/metrics.ipynb 16
 def roc_curve(y_true, y_score, *, pos_label=None):
+    """inherently binary. `pos_label` can be any label in y_true. 
+    compute the ROC curve for that label.
+    use a different convention for the accumulated counts to sklearn that leads to the same auc score"""
     y_true = y_true.reshape(-1,1)
     if y_score.ndim == 1:
         y_score = np.concatenate([1-y_score.reshape(-1,1), y_score.reshape(-1,1)], axis=-1)
@@ -111,21 +118,32 @@ def roc_curve(y_true, y_score, *, pos_label=None):
     idx = np.where(labels==pos_label)[0].item()
     return fprs[:,idx], tprs[:,idx], thresholds[:,idx]
 
-# %% ../nbs/metrics.ipynb 20
+# %% ../nbs/metrics.ipynb 18
 def roc_auc_score(y_true, y_score):
-    fpr, tpr, _ =  roc_curve(y_true, y_score)
+    fpr, tpr, *_ =  roc_curve(y_true, y_score)
     fpr_inc = (np.roll(fpr,-1) - fpr)[:-1]
     auc = (fpr_inc * tpr[:-1]).sum()
     return auc
 
-# %% ../nbs/metrics.ipynb 23
+# %% ../nbs/metrics.ipynb 20
 class RocCurveDisplay:
     """plot result of `roc_curve` which returns fpr, tpr, _ """
     @classmethod
     def from_predictions(cls, y_true, y_score):
-        fpr, tpr, _ = roc_curve(y_true, y_score)
+        fpr, tpr, *_ = roc_curve(y_true, y_score)
         return plt.plot(fpr, tpr)
     
     @classmethod
     def from_estimator(cls, clf, y_true, y_score):
         raise NotImplemented
+
+# %% ../nbs/metrics.ipynb 22
+class ConfusionMatrixDisplay:
+    """plot result of `confusion_matrix`"""
+    @classmethod
+    def from_predictions(cls, y_true, y_pred, sample_weight=None):
+        C = confusion_matrix(y_true, y_pred, sample_weight)
+        sns.heatmap(C, cmap='Blues', annot=True)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.show()
