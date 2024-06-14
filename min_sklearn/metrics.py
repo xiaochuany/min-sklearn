@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['accuracy_score', 'confusion_matrix', 'precision_recall_fscore', 'precision_score', 'recall_score', 'f1_score',
-           'log_loss', 'roc_curve', 'roc_auc_score', 'RocCurveDisplay', 'ConfusionMatrixDisplay']
+           'log_loss', 'roc_curve', 'roc_auc_score', 'Scorer', 'RocCurveDisplay', 'ConfusionMatrixDisplay']
 
 # %% ../nbs/metrics.ipynb 3
 from typing import Union
@@ -126,6 +126,16 @@ def roc_auc_score(y_true, y_score):
     return auc
 
 # %% ../nbs/metrics.ipynb 20
+class Scorer:
+    def __init__(self, score_func, **kwargs): 
+        self.score_func = score_func
+        self.kwargs = kwargs
+    
+    def __call__(self, estimator, X, y_true):
+        y_pred = estimator.predict(X)
+        return self.score_func(y_true, y_pred, **self.kwargs)
+
+# %% ../nbs/metrics.ipynb 23
 class RocCurveDisplay:
     """plot result of `roc_curve` which returns fpr, tpr, _ """
     @classmethod
@@ -137,7 +147,7 @@ class RocCurveDisplay:
     def from_estimator(cls, clf, y_true, y_score):
         raise NotImplemented
 
-# %% ../nbs/metrics.ipynb 22
+# %% ../nbs/metrics.ipynb 25
 class ConfusionMatrixDisplay:
     """plot result of `confusion_matrix`"""
     @classmethod
