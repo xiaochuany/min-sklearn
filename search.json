@@ -1,0 +1,42 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "min-sklearn",
+    "section": "",
+    "text": "We build a tiny core subset of scikit-learn from scratch for educational purposes, with the same API.\nThe only dependency is numpy (so far).",
+    "crumbs": [
+      "min-sklearn"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "min-sklearn",
+    "section": "Install",
+    "text": "Install\nClone this repo and\npip install -e .\n-e for editable mode.",
+    "crumbs": [
+      "min-sklearn"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "min-sklearn",
+    "section": "How to use",
+    "text": "How to use\n\nfrom min_sklearn.metrics import accuracy_score\nimport numpy as np\n\n\nx = np.array([0, 1, 2, 3])\ny = np.array([0, 1, 2, 5])\nassert accuracy_score(x,y, normalize=True, sample_weight = np.array([1, 1, 1, 0])) == 1.0\n\n\ntodo\n\nfinish classification metrics; allow sample weight and multi-class\nmake_scorer\nbase and mixin\nlogistic regression\nrandom forrest\ngradient boosting",
+    "crumbs": [
+      "min-sklearn"
+    ]
+  },
+  {
+    "objectID": "metrics.html",
+    "href": "metrics.html",
+    "title": "metrics",
+    "section": "",
+    "text": "source\n\naccuracy_score\n\n accuracy_score (y_true:numpy.ndarray, y_pred:numpy.ndarray,\n                 normalize=False,\n                 sample_weight:Optional[numpy.ndarray]=None)\n\ncomputes accuracy for binary or multiclass classification\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ny_true\nndarray\n\ntrue labels\n\n\ny_pred\nndarray\n\npredicted labels\n\n\nnormalize\nbool\nFalse\nif weights is not None, normalize by sum of weights\n\n\nsample_weight\nOptional\nNone\nweights for each sample\n\n\n\n\nimport sklearn.metrics as skm\nfrom fastcore.test import test_eq\n\n\nx = np.array([0, 1, 2, 3])\ny = np.array([0, 1, 2, 5])\nweight = np.array([1, 1, 1, 0])\ntest_eq(accuracy_score(x,y, normalize=True, sample_weight = weight), skm.accuracy_score(x,y, normalize=True, sample_weight=weight))\n\n\nsource\n\n\nconfusion_matrix\n\n confusion_matrix (y_true:numpy.ndarray, y_pred:numpy.ndarray,\n                   sample_weight:Optional[numpy.ndarray]=None)\n\ncompute confusion matrix for multiclass classification; assume all labels are present and range from 0 to n_classes-1; \\(C_{ij}\\) is the number of samples that have true label \\(i\\) and predicted label \\(j\\)\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ny_true\nndarray\n\ntrue labels\n\n\ny_pred\nndarray\n\npredicted labels\n\n\nsample_weight\nOptional\nNone\nweights for each sample\n\n\n\n\ny_true = np.array([0, 1,2,0])\ny_pred = np.array([0, 1,0,0])\nweight = np.array([1, 2, 3, 4])\ntest_eq(confusion_matrix(y_true, y_pred, sample_weight=weight), skm.confusion_matrix(y_true, y_pred, sample_weight=weight))\n\n\nsource\n\n\nprecision_recall_fscore\n\n precision_recall_fscore (y_true:numpy.ndarray, y_pred:numpy.ndarray,\n                          sample_weight:Optional[numpy.ndarray]=None)\n\nmacro average the metrics across classes\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ny_true\nndarray\n\ntrue labels\n\n\ny_pred\nndarray\n\npredicted labels\n\n\nsample_weight\nOptional\nNone\nweights for each sample\n\n\n\n\nsource\n\n\nprecision_score\n\n precision_score (y_true, y_pred, **kwargs)\n\ncompute the macro averaged precision\n\nsource\n\n\nrecall_score\n\n recall_score (y_true, y_pred, **kwargs)\n\ncompute the macro averaged recall\n\nsource\n\n\nf1_score\n\n f1_score (y_true, y_pred, **kwargs)\n\ncompute the macro averaged f1 score\n\ny_true = np.array([0, 1, 2, 0])\ny_pred = np.array([0, 1, 2, 2])\nweight = np.array([1, 1, 1, 0]) # ignore the last example\n\ntest_eq(precision_score(y_true, y_pred, sample_weight = weight), skm.precision_score(y_true, y_pred, sample_weight=weight, average='macro'))\ntest_eq(recall_score(y_true, y_pred, sample_weight = weight), skm.recall_score(y_true, y_pred, sample_weight=weight, average='macro'))\ntest_eq(f1_score(y_true, y_pred, sample_weight = weight), skm.f1_score(y_true, y_pred, sample_weight=weight, average='macro'))\n\n\nsource\n\n\nlog_loss\n\n log_loss (y_true, y_pred, sample_weight=None)\n\ny_true.dim == 1, y_pred.dim == 2, sample_weights.dim == 1\n\nx1 = np.array([0, 1, 1])\nx2 = np.array([[0.1, 0.9], [0.9, 0.1], [0.1, 0.9]])\nw = np.array([1, 1, 100])\ntest_eq(log_loss(x1, x2, sample_weight=w), skm.log_loss(x1, x2, sample_weight=w))\n\n\nsource\n\n\nroc_curve\n\n roc_curve (y_true, y_score, pos_label=None)\n\ninherently binary. pos_label can be any label in y_true. compute the ROC curve for that label. use a different convention for the accumulated counts to sklearn that leads to the same auc score\n\nroc_curve(np.array([0, 1, 1, 0]), np.array([0.3, 0.9, 0.1, 0.8]))\n\n(array([0. , 0.5, 1. , 1. ]),\n array([0.5, 0.5, 0.5, 1. ]),\n array([0.9, 0.8, 0.3, 0.1]))\n\n\n\nsource\n\n\nroc_auc_score\n\n roc_auc_score (y_true, y_score)\n\n\na1 = np.array([1,0,1,0,1,1,1,1])\na2 = np.random.random(8)\ntest_eq(roc_auc_score(a1, a2), skm.roc_auc_score(a1, a2))\n\n\nsource\n\n\nScorer\n\n Scorer (score_func, **kwargs)\n\nInitialize self. See help(type(self)) for accurate signature.\n\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.linear_model import LogisticRegression\n\n\nX = np.random.default_rng().random((100,10))\ny = np.random.default_rng().choice(2,100)\nweight = np.arange(100)\nclf = LogisticRegression()\nscorer = Scorer(accuracy_score)\nsk_scorer = skm.make_scorer(accuracy_score)\ntest_eq(cross_val_score(clf, X, y, scoring=scorer), cross_val_score(clf, X, y, scoring=sk_scorer))\n\n\nsource\n\n\nRocCurveDisplay\n\n RocCurveDisplay ()\n\n*plot result of roc_curve which returns fpr, tpr, _*\n\nRocCurveDisplay.from_predictions(a1, a2)\n\n\n\n\n\n\n\n\n\nsource\n\n\nConfusionMatrixDisplay\n\n ConfusionMatrixDisplay ()\n\nplot result of confusion_matrix\n\nConfusionMatrixDisplay.from_predictions(y_true, y_pred)",
+    "crumbs": [
+      "metrics"
+    ]
+  }
+]
